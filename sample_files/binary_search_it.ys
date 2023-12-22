@@ -1,0 +1,80 @@
+# ALPEREN TAŞDELEN 2521987
+.pos 0x0
+init:
+    irmovq stack, %rsp
+    irmovq $6, %rdx
+    irmovq array_begin, %rdi
+    irmovq array_end, %rsi
+    call binary_search
+    halt
+
+#implement your code below (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+#rrmovq %rax, %rax
+#ret
+
+binary_search:    
+    rrmovq %rdi, %rcx
+loop:
+    rrmovq %rcx, %r14
+    subq %rsi, %r14
+    jge end
+
+    rrmovq %rsi, %rax
+    subq %rcx, %rax
+    rrmovq %rax, %r8
+    irmovq $8, %r14
+    dvvq %r14, %r8
+    irmovq $0, %rax
+    addq %r8, %rax
+    irmovq $2, %r14
+    dvvq %r14, %rax
+    irmovq $8, %r14
+    mllq %r14, %rax
+    addq %rcx, %rax
+    mrmovq (%rax), %r8
+    rrmovq %r8, %r14
+    subq %rdx, %r14
+    je equal
+
+    jl smaller
+    
+    rrmovq %rax, %rsi
+    jmp loop
+
+equal:
+    subq %rdi, %rax
+    irmovq $8, %r14
+    dvvq %r14, %rax
+    irmovq $1, %r14
+    addq %r14, %rax
+    ret 
+
+smaller:
+    irmovq $8, %rcx 
+    addq %rax, %rcx
+    jmp loop
+
+end:
+    irmovq $-1, %rax
+    ret
+
+#implement your code above (DO NOT CHANGE/REMOVE THIS COMMENT)
+
+.pos 0x1008
+array_begin:
+    .quad 1
+    .quad 2
+    .quad 3
+    .quad 5
+    .quad 6
+    .quad 7
+    .quad 9
+    .quad 11
+array_end:
+    .quad 0
+.pos 0x1F00
+stack:
+    .quad 0
+
+
