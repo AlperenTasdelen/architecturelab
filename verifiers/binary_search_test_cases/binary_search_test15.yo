@@ -1,0 +1,94 @@
+0x000:                      | .pos 0x0
+0x000: 30f4001f000000000000 | irmovq stack, %rsp
+0x00a: 30f20c00000000000000 | irmovq $12, %rdx #queried value
+0x014: 30f70810000000000000 | irmovq array_begin, %rdi
+0x01e: 30f6a010000000000000 | irmovq array_end, %rsi
+0x028: 803200000000000000   | call binary_search
+0x031: 00                   | halt
+                            | 
+                            | 
+                            | #irmovq $-1, %rax
+                            | #ret
+                            | 
+0x032:                      | binary_search:
+0x032: a03f                 |     pushq %rbx
+0x034: 2063                 |     rrmovq %rsi, %rbx
+0x036: 6173                 |     subq %rdi, %rbx,
+0x038: 30fe1000000000000000 |     irmovq $16, %r14
+0x042: 67e3                 |     dvvq %r14, %rbx
+0x044: 30fe0800000000000000 |     irmovq $8, %r14
+0x04e: 65e3                 |     mllq %r14, %rbx
+0x050: 2070                 |     rrmovq %rdi, %rax
+0x052: 6030                 |     addq %rbx, %rax
+0x054: 206e                 |     rrmovq %rsi, %r14
+0x056: 617e                 |     subq %rdi, %r14
+0x058: 71fd00000000000000   |     jle end
+                            | 
+0x061: 50100000000000000000 |     mrmovq (%rax), %rcx
+0x06b: 201e                 |     rrmovq %rcx, %r14
+0x06d: 612e                 |     subq %rdx, %r14
+0x06f: 73c800000000000000   |     je equal
+                            | 
+0x078: 75e900000000000000   |     jge greater
+                            | 
+0x081: 30f70800000000000000 |     irmovq $8, %rdi
+0x08b: 6007                 |     addq %rax, %rdi
+0x08d: 803200000000000000   |     call binary_search
+0x096: 30feffffffffffffffff |     irmovq $-1, %r14
+0x0a0: 610e                 |     subq %rax, %r14
+0x0a2: 73c500000000000000   |     je exit
+0x0ab: 30fe0800000000000000 |     irmovq $8, %r14
+0x0b5: 67e3                 |     dvvq %r14, %rbx
+0x0b7: 6030                 |     addq %rbx, %rax
+0x0b9: 30fe0100000000000000 |     irmovq $1, %r14
+0x0c3: 60e0                 |     addq %r14, %rax
+                            | 
+0x0c5:                      | exit:
+0x0c5: b03f                 |     popq %rbx
+0x0c7: 90                   |     ret
+                            | 
+0x0c8:                      | equal:
+0x0c8: 30fe0800000000000000 |     irmovq $8, %r14
+0x0d2: 67e3                 |     dvvq %r14, %rbx
+0x0d4: 30f00100000000000000 |     irmovq $1, %rax
+0x0de: 6030                 |     addq %rbx, %rax
+0x0e0: 70c500000000000000   |     jmp exit 
+                            | 
+0x0e9:                      | greater:
+0x0e9: 2006                 |     rrmovq %rax, %rsi
+0x0eb: 803200000000000000   |     call binary_search
+0x0f4: 70c500000000000000   |     jmp exit
+                            | 
+0x0fd:                      | end:
+0x0fd: 30f0ffffffffffffffff |     irmovq $-1, %rax
+0x107: 70c500000000000000   |     jmp exit
+                            | 
+                            | 
+                            | 
+0x1008:                      | .pos 0x1008
+0x1008:                      | array_begin:
+0x1008:6700000000000000      | .quad 103
+0x1010:6800000000000000      | .quad 104
+0x1018:6c00000000000000      | .quad 108
+0x1020:7500000000000000      | .quad 117
+0x1028:7600000000000000      | .quad 118
+0x1030:7900000000000000      | .quad 121
+0x1038:8200000000000000      | .quad 130
+0x1040:8400000000000000      | .quad 132
+0x1048:8600000000000000      | .quad 134
+0x1050:8b00000000000000      | .quad 139
+0x1058:8e00000000000000      | .quad 142
+0x1060:9000000000000000      | .quad 144
+0x1068:9500000000000000      | .quad 149
+0x1070:9900000000000000      | .quad 153
+0x1078:9f00000000000000      | .quad 159
+0x1080:a000000000000000      | .quad 160
+0x1088:ac00000000000000      | .quad 172
+0x1090:b200000000000000      | .quad 178
+0x1098:c000000000000000      | .quad 192
+0x10a0:                      | array_end:
+0x10a0:0000000000000000      | .quad 0
+0x1f00:                      | .pos 0x1F00
+0x1f00:                      | stack:
+0x1f00:0000000000000000      | .quad 0
+                             | 

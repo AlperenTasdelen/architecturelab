@@ -1,0 +1,75 @@
+.pos 0x0
+irmovq stack, %rsp
+irmovq $10, %rdx #queried value
+irmovq array_begin, %rdi
+irmovq array_end, %rsi
+call binary_search
+halt
+
+
+#irmovq $-1, %rax
+#ret
+
+binary_search:
+    pushq %rbx
+    rrmovq %rsi, %rbx
+    subq %rdi, %rbx,
+    irmovq $16, %r14
+    dvvq %r14, %rbx
+    irmovq $8, %r14
+    mllq %r14, %rbx
+    rrmovq %rdi, %rax
+    addq %rbx, %rax
+    rrmovq %rsi, %r14
+    subq %rdi, %r14
+    jle end
+
+    mrmovq (%rax), %rcx
+    rrmovq %rcx, %r14
+    subq %rdx, %r14
+    je equal
+
+    jge greater
+
+    irmovq $8, %rdi
+    addq %rax, %rdi
+    call binary_search
+    irmovq $-1, %r14
+    subq %rax, %r14
+    je exit
+    irmovq $8, %r14
+    dvvq %r14, %rbx
+    addq %rbx, %rax
+    irmovq $1, %r14
+    addq %r14, %rax
+
+exit:
+    popq %rbx
+    ret
+
+equal:
+    irmovq $8, %r14
+    dvvq %r14, %rbx
+    irmovq $1, %rax
+    addq %rbx, %rax
+    jmp exit 
+
+greater:
+    rrmovq %rax, %rsi
+    call binary_search
+    jmp exit
+
+end:
+    irmovq $-1, %rax
+    jmp exit
+
+
+
+.pos 0x1008
+array_begin:
+array_end:
+.quad 0
+.pos 0x1F00
+stack:
+.quad 0
+

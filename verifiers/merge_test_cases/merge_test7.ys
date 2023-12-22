@@ -1,0 +1,115 @@
+.pos 0x0
+init:
+    irmovq stack, %rsp
+    irmovq array_begin1, %rdi
+    irmovq array_end1, %rsi
+    irmovq array_begin2, %rdx
+    irmovq array_end2, %rcx
+    irmovq array_begin3, %r8
+    call merge
+    halt
+
+
+merge:
+    jmp L2
+
+L3:
+    irmovq $8, %r14
+    addq %r14, %rdx
+    rmmovq %rax, (%r8)
+    addq %r14, %r8
+
+L2:
+    rrmovq %rdi, %r14
+    irmovq $0, %r9       ###########
+    irmovq $0, %rax      ###########
+    irmovq $1, %r13
+    subq %rsi, %r14
+    cmovl %r13, %r9      ###########
+    rrmovq %rdx, %r14
+    subq %rcx, %r14
+    cmovl %r13, %rax     ############
+    rrmovq %r9, %r14
+    subq %rax, %r14      ############
+
+    #irmovq $8, %r14
+    #rmmovq %r9, (%r8)
+    #ret
+
+
+    jne L6
+
+    mrmovq (%rdi), %r9
+    mrmovq (%rdx), %rax
+    rrmovq %r9, %r14
+    subq %rax, %r14
+    jge L3
+
+    irmovq $8, %r14
+    addq %r14, %rdi
+    rmmovq %r9, (%r8)
+    addq %r14, %r8
+    jmp L2
+
+L6:
+    
+    rrmovq %rdi, %r14
+    subq %rsi, %r14
+    jge L8
+    mrmovq (%rdi), %rax
+    rmmovq %rax, (%r8)
+    irmovq $8, %r14
+    addq %r14, %r8
+    addq %r14, %rdi
+    jmp L6
+
+L9:
+    mrmovq (%rdx), %rax
+    rmmovq %rax, (%r8)
+    irmovq $8, %r14
+    addq %r14, %r8
+    addq %r14, %rdx
+
+L8:
+    rrmovq %rdx, %r14
+    subq %rcx, %r14
+    jl L9
+    ret
+
+
+
+.pos 0x1008
+array_begin1:
+.quad 102
+.quad 119
+.quad 120
+.quad 125
+.quad 136
+.quad 137
+.quad 164
+.quad 167
+.quad 187
+.quad 197
+array_end1:
+.quad 0
+array_begin2:
+.quad 103
+.quad 104
+.quad 105
+.quad 116
+.quad 158
+.quad 179
+.quad 183
+.quad 184
+.quad 185
+.quad 193
+array_end2:
+.quad 0
+
+.pos 0x1300
+array_begin3:
+.quad 0
+.pos 0x1F00
+stack:
+.quad 0
+
