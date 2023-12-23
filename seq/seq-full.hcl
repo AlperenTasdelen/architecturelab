@@ -1,3 +1,10 @@
+# ALPEREN TAŞDELEN 2521987
+#
+#
+#
+#
+#
+#
 #/* $begin seq-all-hcl */
 ####################################################################
 #  HCL Description of Control for Single Cycle Y86-64 Processor SEQ   #
@@ -110,13 +117,13 @@ bool need_regids =
 
 # Does fetched instruction require a constant word?
 bool need_valC =
-icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL };
+icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IJTAB }; #added here
 
 ################ Decode Stage    ###################################
 
 ## What register should be used as the A source?
 word srcA = [
-    icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ  } : rA;
+    icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ, IJTAB } : rA; #added here
 	icode in { IPOPQ, IRET } : RRSP;
 	1 : RNONE; # Don't need register
 ];
@@ -124,7 +131,7 @@ word srcA = [
 ## What register should be used as the B source?
 word srcB = [
 	icode in { IOPQ, IRMMOVQ, IMRMOVQ  } : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET, IJTAB } : RRSP; #added here
 	1 : RNONE;  # Don't need register
 ];
 
@@ -132,7 +139,7 @@ word srcB = [
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
 	icode in { IIRMOVQ, IOPQ} : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP;
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET, IJTAB} : RRSP; #added here
 	1 : RNONE;  # Don't write any register
 ];
 
@@ -146,7 +153,7 @@ word dstM = [
 
 ## Select input A to ALU
 word aluA = [
-	icode in { IRRMOVQ, IOPQ } : valA;
+	icode in { IRRMOVQ, IOPQ, IJTAB } : valA; #added here
 	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
 	icode in { ICALL, IPUSHQ } : -8;
 	icode in { IRET, IPOPQ } : 8;
@@ -156,7 +163,7 @@ word aluA = [
 ## Select input B to ALU
 word aluB = [
 	icode in { IRMMOVQ, IMRMOVQ, IOPQ, ICALL, 
-		      IPUSHQ, IRET, IPOPQ } : valB;
+		      IPUSHQ, IRET, IPOPQ, IJTAB} : valB; #added here
 	icode in { IRRMOVQ, IIRMOVQ } : 0;
 	# Other instructions don't need ALU
 ];
@@ -164,6 +171,7 @@ word aluB = [
 ## Set the ALU function
 word alufun = [
 	icode == IOPQ : ifun;
+	icode == IJTAB : ALUADD; #added here
 	1 : ALUADD;
 ];
 
