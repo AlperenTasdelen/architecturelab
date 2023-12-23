@@ -108,12 +108,12 @@ word ifun = [
 
 bool instr_valid = icode in 
 	{ INOP, IHALT, IRRMOVQ, IIRMOVQ, IRMMOVQ, IMRMOVQ,
-	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ };
+	       IOPQ, IJXX, ICALL, IRET, IPUSHQ, IPOPQ, IJTAB };
 
 # Does fetched instruction require a regid byte?
 bool need_regids =
 	icode in { IRRMOVQ, IOPQ, IPUSHQ, IPOPQ, 
-		     IIRMOVQ, IRMMOVQ, IMRMOVQ };
+		     IIRMOVQ, IRMMOVQ, IMRMOVQ, IJTAB };
 
 # Does fetched instruction require a constant word?
 bool need_valC =
@@ -123,15 +123,15 @@ icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJXX, ICALL, IJTAB }; #added here
 
 ## What register should be used as the A source?
 word srcA = [
-    icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ, IJTAB } : rA; #added here
+    icode in { IRRMOVQ, IRMMOVQ, IOPQ, IPUSHQ } : rA; #added here
 	icode in { IPOPQ, IRET } : RRSP;
 	1 : RNONE; # Don't need register
 ];
 
 ## What register should be used as the B source?
 word srcB = [
-	icode in { IOPQ, IRMMOVQ, IMRMOVQ  } : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET, IJTAB } : RRSP; #added here
+	icode in { IOPQ, IRMMOVQ, IMRMOVQ, IJTAB } : rB;
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET, } : RRSP; #added here
 	1 : RNONE;  # Don't need register
 ];
 
@@ -139,7 +139,7 @@ word srcB = [
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
 	icode in { IIRMOVQ, IOPQ} : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET, IJTAB} : RRSP; #added here
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET, } : RRSP; #added here
 	1 : RNONE;  # Don't write any register
 ];
 
@@ -153,8 +153,8 @@ word dstM = [
 
 ## Select input A to ALU
 word aluA = [
-	icode in { IRRMOVQ, IOPQ, IJTAB } : valA; #added here
-	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ } : valC;
+	icode in { IRRMOVQ, IOPQ } : valA; #added here
+	icode in { IIRMOVQ, IRMMOVQ, IMRMOVQ, IJTAB } : valC;
 	icode in { ICALL, IPUSHQ } : -8;
 	icode in { IRET, IPOPQ } : 8;
 	# Other instructions don't need ALU
@@ -171,7 +171,6 @@ word aluB = [
 ## Set the ALU function
 word alufun = [
 	icode == IOPQ : ifun;
-	icode == IJTAB : ALUADD; #added here
 	1 : ALUADD;
 ];
 
@@ -181,14 +180,14 @@ bool set_cc = icode in { IOPQ };
 ################ Memory Stage    ###################################
 
 ## Set read control signal
-bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET };
+bool mem_read = icode in { IMRMOVQ, IPOPQ, IRET, IJTAB };
 
 ## Set write control signal
 bool mem_write = icode in { IRMMOVQ, IPUSHQ, ICALL };
 
 ## Select memory address
 word mem_addr = [
-	icode in { IRMMOVQ, IPUSHQ, ICALL, IMRMOVQ } : valE;
+	icode in { IRMMOVQ, IPUSHQ, ICALL, IMRMOVQ, IJTAB } : valE;
 	icode in { IPOPQ, IRET } : valA;
 	# Other instructions don't need address
 ];
@@ -217,6 +216,8 @@ word Stat = [
 word new_pc = [
 	# Call.  Use instruction constant
 	icode == ICALL : valC;
+	# IJTAB
+	icode == IJTAB : valM; 
 	# Taken branch.  Use instruction constant
 	icode == IJXX && Cnd : valC;
 	# Completion of RET instruction.  Use value from stack
