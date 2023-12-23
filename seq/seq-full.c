@@ -22,14 +22,14 @@ long long gen_instr_valid()
       (I_RRMOVQ) || (icode) == (I_IRMOVQ) || (icode) == (I_RMMOVQ) || 
       (icode) == (I_MRMOVQ) || (icode) == (I_ALU) || (icode) == (I_JMP) || 
       (icode) == (I_CALL) || (icode) == (I_RET) || (icode) == (I_PUSHQ) || 
-      (icode) == (I_POPQ));
+      (icode) == (I_POPQ) || (icode) == (I_JTAB));
 }
 
 long long gen_need_regids()
 {
     return ((icode) == (I_RRMOVQ) || (icode) == (I_ALU) || (icode) == 
       (I_PUSHQ) || (icode) == (I_POPQ) || (icode) == (I_IRMOVQ) || (icode)
-       == (I_RMMOVQ) || (icode) == (I_MRMOVQ));
+       == (I_RMMOVQ) || (icode) == (I_MRMOVQ) || (icode) == (I_JTAB));
 }
 
 long long gen_need_valC()
@@ -42,17 +42,16 @@ long long gen_need_valC()
 long long gen_srcA()
 {
     return (((icode) == (I_RRMOVQ) || (icode) == (I_RMMOVQ) || (icode) == 
-        (I_ALU) || (icode) == (I_PUSHQ) || (icode) == (I_JTAB)) ? (ra) : (
-        (icode) == (I_POPQ) || (icode) == (I_RET)) ? (REG_RSP) : (REG_NONE)
-      );
+        (I_ALU) || (icode) == (I_PUSHQ)) ? (ra) : ((icode) == (I_POPQ) || 
+        (icode) == (I_RET)) ? (REG_RSP) : (REG_NONE));
 }
 
 long long gen_srcB()
 {
     return (((icode) == (I_ALU) || (icode) == (I_RMMOVQ) || (icode) == 
-        (I_MRMOVQ)) ? (rb) : ((icode) == (I_PUSHQ) || (icode) == (I_POPQ)
-         || (icode) == (I_CALL) || (icode) == (I_RET) || (icode) == 
-        (I_JTAB)) ? (REG_RSP) : (REG_NONE));
+        (I_MRMOVQ) || (icode) == (I_JTAB)) ? (rb) : ((icode) == (I_PUSHQ)
+         || (icode) == (I_POPQ) || (icode) == (I_CALL) || (icode) == 
+        (I_RET)) ? (REG_RSP) : (REG_NONE));
 }
 
 long long gen_dstE()
@@ -60,7 +59,7 @@ long long gen_dstE()
     return ((((icode) == (I_RRMOVQ)) & (cond)) ? (rb) : ((icode) == 
         (I_IRMOVQ) || (icode) == (I_ALU)) ? (rb) : ((icode) == (I_PUSHQ)
          || (icode) == (I_POPQ) || (icode) == (I_CALL) || (icode) == 
-        (I_RET) || (icode) == (I_JTAB)) ? (REG_RSP) : (REG_NONE));
+        (I_RET)) ? (REG_RSP) : (REG_NONE));
 }
 
 long long gen_dstM()
@@ -71,11 +70,11 @@ long long gen_dstM()
 
 long long gen_aluA()
 {
-    return (((icode) == (I_RRMOVQ) || (icode) == (I_ALU) || (icode) == 
-        (I_JTAB)) ? (vala) : ((icode) == (I_IRMOVQ) || (icode) == 
-        (I_RMMOVQ) || (icode) == (I_MRMOVQ)) ? (valc) : ((icode) == 
-        (I_CALL) || (icode) == (I_PUSHQ)) ? -8 : ((icode) == (I_RET) || 
-        (icode) == (I_POPQ)) ? 8 : 0);
+    return (((icode) == (I_RRMOVQ) || (icode) == (I_ALU)) ? (vala) : (
+        (icode) == (I_IRMOVQ) || (icode) == (I_RMMOVQ) || (icode) == 
+        (I_MRMOVQ) || (icode) == (I_JTAB)) ? (valc) : ((icode) == (I_CALL)
+         || (icode) == (I_PUSHQ)) ? -8 : ((icode) == (I_RET) || (icode) == 
+        (I_POPQ)) ? 8 : 0);
 }
 
 long long gen_aluB()
@@ -88,8 +87,7 @@ long long gen_aluB()
 
 long long gen_alufun()
 {
-    return (((icode) == (I_ALU)) ? (ifun) : ((icode) == (I_JTAB)) ? (A_ADD)
-       : (A_ADD));
+    return (((icode) == (I_ALU)) ? (ifun) : (A_ADD));
 }
 
 long long gen_set_cc()
@@ -100,7 +98,7 @@ long long gen_set_cc()
 long long gen_mem_read()
 {
     return ((icode) == (I_MRMOVQ) || (icode) == (I_POPQ) || (icode) == 
-      (I_RET));
+      (I_RET) || (icode) == (I_JTAB));
 }
 
 long long gen_mem_write()
@@ -112,8 +110,8 @@ long long gen_mem_write()
 long long gen_mem_addr()
 {
     return (((icode) == (I_RMMOVQ) || (icode) == (I_PUSHQ) || (icode) == 
-        (I_CALL) || (icode) == (I_MRMOVQ)) ? (vale) : ((icode) == (I_POPQ)
-         || (icode) == (I_RET)) ? (vala) : 0);
+        (I_CALL) || (icode) == (I_MRMOVQ) || (icode) == (I_JTAB)) ? (vale)
+       : ((icode) == (I_POPQ) || (icode) == (I_RET)) ? (vala) : 0);
 }
 
 long long gen_mem_data()
@@ -130,7 +128,8 @@ long long gen_Stat()
 
 long long gen_new_pc()
 {
-    return (((icode) == (I_CALL)) ? (valc) : (((icode) == (I_JMP)) & (cond)
-        ) ? (valc) : ((icode) == (I_RET)) ? (valm) : (valp));
+    return (((icode) == (I_CALL)) ? (valc) : ((icode) == (I_JTAB)) ? (valm)
+       : (((icode) == (I_JMP)) & (cond)) ? (valc) : ((icode) == (I_RET)) ? 
+      (valm) : (valp));
 }
 

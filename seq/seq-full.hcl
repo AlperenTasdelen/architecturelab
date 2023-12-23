@@ -131,7 +131,7 @@ word srcA = [
 ## What register should be used as the B source?
 word srcB = [
 	icode in { IOPQ, IRMMOVQ, IMRMOVQ, IJTAB } : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET, } : RRSP; #added here
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP; #added here
 	1 : RNONE;  # Don't need register
 ];
 
@@ -139,7 +139,7 @@ word srcB = [
 word dstE = [
 	icode in { IRRMOVQ } && Cnd : rB;
 	icode in { IIRMOVQ, IOPQ} : rB;
-	icode in { IPUSHQ, IPOPQ, ICALL, IRET, } : RRSP; #added here
+	icode in { IPUSHQ, IPOPQ, ICALL, IRET } : RRSP; #added here
 	1 : RNONE;  # Don't write any register
 ];
 
